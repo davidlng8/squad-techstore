@@ -5,5 +5,6 @@ export interface ProductProps {
         price: number;
         description: string;
         img_url: string;
-    }
+    }, 
+    onDelete: (productId: number) => void;
 };
