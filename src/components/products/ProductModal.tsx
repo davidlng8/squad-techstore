@@ -53,7 +53,7 @@ const ProductModal: React.FC<ModalProps> = ({ isOpen, onClose, mode, itemId }) =
                         setProduct(data);
                         setEditFormData({
                             name: data.name,
-                            price: data.price,
+                            price: Number(data.price),
                             description: data.description,
                             img_url: data.img_url
                         });
@@ -131,7 +131,7 @@ const ProductModal: React.FC<ModalProps> = ({ isOpen, onClose, mode, itemId }) =
                                         type="text"
                                         id="name"
                                         name="name"
-                                        defaultValue={product.name}
+                                        defaultValue={editFormData.name}
                                         onChange={handleInputChange}
                                         className="mt-1 p-2 border rounded-md w-full" />
                                 </div>
@@ -146,7 +146,7 @@ const ProductModal: React.FC<ModalProps> = ({ isOpen, onClose, mode, itemId }) =
                                         type="number"
                                         id="price"
                                         name="price"
-                                        defaultValue={product.price}
+                                        value={editFormData.price}
                                         onChange={handleInputChange}
                                         className="mt-1 p-2 border rounded-md w-full" />
                                 </div>
@@ -160,7 +160,7 @@ const ProductModal: React.FC<ModalProps> = ({ isOpen, onClose, mode, itemId }) =
                                     <textarea
                                         id="description"
                                         name="description"
-                                        defaultValue={product.description}
+                                        defaultValue={editFormData.description}
                                         className="mt-1 p-2 border rounded-md w-full"/>
                                 </div>
                                 <div className="relative mb-2">
@@ -174,7 +174,7 @@ const ProductModal: React.FC<ModalProps> = ({ isOpen, onClose, mode, itemId }) =
                                         id="img_url"
                                         name="img_url"
                                         placeholder="Image URL"
-                                        defaultValue={product.img_url}
+                                        defaultValue={editFormData.img_url}
                                         onChange={handleInputChange}
                                         className="mt-1 p-2 border rounded-md w-full" />
                                 </div>
