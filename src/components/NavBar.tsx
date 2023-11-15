@@ -2,6 +2,8 @@ import React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faCirclePlus } from '@fortawesome/free-solid-svg-icons'
 
+// TODO: Fix sticky scroll
+// TODO: configure add item using product modal
 export default function NavBar() {
   return (
     <nav className="bg-gray-800 text-white p-4 flex justify-between items-center sticky top-0 z-50">

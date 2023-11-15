@@ -32,6 +32,10 @@ const ProductGrid: React.FC = () => {
                 console.error('Error fetching data:', error);
             });
     }, []);
+
+    if (products.length == 0) {
+        return (<><h2 className='text-3xl ml-4 my-10'>No products available</h2></>)
+    }
     return (
         <>
             <h2 className='text-3xl ml-4 my-10'>All Products</h2>
