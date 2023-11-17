@@ -13,30 +13,68 @@ const deleteProduct = async (productId: number) => {
     return await response.json();
 };
 
-const ProductGridItem: React.FC<ProductProps> = ({ product, onDelete }) => {
+const updateProduct = async (productId: number, data: any) => {
+    const response = await fetch(`/api-items/${productId}`, { 
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+    });
+    if (!response.ok) {
+        throw new Error('Failed to update product');
+    }
+    return await response.json();
+};
+
+const ProductGridItem: React.FC<ProductProps> = ({ product, onDelete, onUpdate }) => {
+    const [actionInProgress, setActionInProgress] = useState(false);
+    const [actionMessage, setActionMessage] = useState('');
+    const [isModalOpen, setIsModalOpen] = useState(false);
+
     const deleteHandler = () => {
         // Disable buttons during the delete operation and clear out the response message
-        setDeleteInProgress(true);
-        setDeleteMessage('');
-        const productId = product.id;
-        deleteProduct(productId)
-            .then(() => {
-                setDeleteMessage('Item successfully deleted');
-            })
-            .catch(error => {
-                setDeleteMessage(error.message);
-            }).finally(() => {
-                setTimeout(() => {
-                    setDeleteInProgress(false);
-                    setDeleteMessage('');
-                    onDelete(productId);
-                }, 2000);
-            });
+        setActionInProgress(true);
+        setActionMessage('');
+        setTimeout(() => {
+            // Simulate the API loading time
+            deleteProduct(product.id)    
+                .then(() => {
+                    setActionMessage('Item successfully deleted');
+                })
+                .catch(error => {
+                    setActionMessage(error.message);
+                }).finally(() => {
+                    setTimeout(() => {
+                        // Allow the message to linger for 2 seconds
+                        setActionInProgress(false);
+                        setActionMessage('');
+                        onDelete(product.id);
+                    }, 2000);
+                });
+        }, 2000);
     };
 
-    const [deleteInProgress, setDeleteInProgress] = useState(false);
-    const [deleteMessage, setDeleteMessage] = useState('');
-    const [isModalOpen, setIsModalOpen] = useState(false);
+    const editHandler = (updateData : ProductProps['product']) => {
+        // Close the edit modal
+        setIsModalOpen(false);
+        // Show the spinner modal
+        setActionInProgress(true);
+        setTimeout(() => {
+            updateProduct(Number(updateData.id), updateData)
+                .then(() => {
+                    setActionMessage('Product update successful');
+                    onUpdate(updateData);
+                })
+                .catch(error => {
+                    setActionMessage(error.message);
+                    setActionMessage('An error occured. Cannot update at this time');
+                }).finally(() => {
+                    setTimeout(() => {
+                        setActionInProgress(false);
+                        setActionMessage('');
+                    }, 2000);
+                });
+        }, 2000);
+    }
 
     return (
         <>
@@ -51,11 +89,11 @@ const ProductGridItem: React.FC<ProductProps> = ({ product, onDelete }) => {
                 <p className="text-gray-600 mb-4 h-18 overflow-hidden line-clamp-3 transition-height">
                     {product.description}
                 </p>
-                {deleteInProgress && (
+                {actionInProgress && (
                     <div className="absolute inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center">
-                        {deleteMessage ? (
-                            <div className={`bg-white p-4 rounded-md ${deleteMessage.includes('success') ? 'border-green-500' : 'border-red-500'} border`}>
-                                {deleteMessage}
+                        {actionMessage ? (
+                            <div className={`bg-white p-4 rounded-md ${actionMessage.includes('success') ? 'border-green-500' : 'border-red-500'} border`}>
+                                {actionMessage}
                             </div>
                         ) : (
                             <Spinner />
@@ -66,24 +104,24 @@ const ProductGridItem: React.FC<ProductProps> = ({ product, onDelete }) => {
                     <span className="text-blue-500 font-bold">${product.price}</span>
                     <div className="space-x-2">
                         <button
-                            disabled={deleteInProgress}
+                            disabled={actionInProgress}
                             onClick={() => setIsModalOpen(true)}
-                            className={`bg-green-500 text-white px-4 py-2 rounded-md mr-2 ${deleteInProgress ? 'opacity-50 cursor-not-allowed' : 'hover:bg-green-700'}`}
+                            className={`bg-green-500 text-white px-4 py-2 rounded-md mr-2 ${actionInProgress ? 'opacity-50 cursor-not-allowed' : 'hover:bg-green-700'}`}
                         >
                             <FontAwesomeIcon icon={faPenToSquare} />
                             <span className="ml-2">Edit</span>
                         </button>
                         <button
                             onClick={deleteHandler}
-                            disabled={deleteInProgress}
-                            className={`bg-red-700 text-white px-4 py-2 rounded-md ${deleteInProgress ? 'opacity-50 cursor-not-allowed' : 'hover:bg-red-900'}`}
+                            disabled={actionInProgress}
+                            className={`bg-red-700 text-white px-4 py-2 rounded-md ${actionInProgress ? 'opacity-50 cursor-not-allowed' : 'hover:bg-red-900'}`}
                         >
                             <FontAwesomeIcon icon={faTrashCan} />
                             <span className="ml-2">Delete</span>
                         </button>
                     </div>
                 </div>
-                <ProductModal mode="edit" itemId={product.id} isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
+                <ProductModal itemId={product.id} isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} onEdit={editHandler} />
             </div>
         </>
     );

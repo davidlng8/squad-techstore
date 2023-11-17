@@ -7,4 +7,5 @@ export interface ProductProps {
         img_url: string;
     }, 
     onDelete: (productId: number) => void;
+    onUpdate: (updatedProductData: ProductProps['product']) => void;
 };
