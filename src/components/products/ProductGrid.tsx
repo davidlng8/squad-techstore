@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import ProductGridItem from './ProductGridItem';
-import '../../assets/css/ProductSearchPage.css'
 
 const ProductGrid: React.FC = () => {
     const apiUrl = '/api-items';
