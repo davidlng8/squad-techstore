@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import ProductGridItem from './ProductGridItem';
+import { ProductProps } from '../../interfaces/Product';
 
 const ProductGrid: React.FC = () => {
     const apiUrl = '/api-items';
@@ -8,6 +9,15 @@ const ProductGrid: React.FC = () => {
     const deleteProductHandler = (productId: number) => {
         // Remove the deleted product from the state
         setProducts(prevProducts => prevProducts.filter(product => product.id !== productId));
+    };
+
+    const editProductHandler = (updatedProductData: ProductProps['product']) => {
+        // Update the product data in the state
+        setProducts((prevProducts) =>
+          prevProducts.map((product) =>
+            product.id === updatedProductData.id ? { ...product, ...updatedProductData } : product
+          )
+        );
     };
 
     useEffect(() => {
@@ -41,7 +51,7 @@ const ProductGrid: React.FC = () => {
             <div className="max-w-screen-2xl px-4 mx-auto mt-8 pb-20 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                 {products.map((product) => (
                     /** Pass the function to handle deletion so the component can emit the action to the parent */
-                    <ProductGridItem key={product.id} product={product} onDelete={deleteProductHandler}/>
+                    <ProductGridItem key={product.id} product={product} onDelete={deleteProductHandler} onUpdate={editProductHandler}/>
                 ))}
             </div>
         </>
