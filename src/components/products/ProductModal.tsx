@@ -2,27 +2,13 @@ import React, { useState, useEffect } from "react";
 import { ProductProps } from "../../interfaces/Product";
 
 interface ModalProps {
-    mode: string;
     isOpen: boolean;
     onClose: () => void;
+    onEdit: (updateData : ProductProps['product']) => void;
     itemId: number | null,
-    // Add any other props needed for editing
 }
 
-const updateProduct = async (productId: number, data: any) => {
-    console.log('Data to send:', data);
-    const response = await fetch(`/api-items/${productId}`, { 
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data)
-    });
-    if (!response.ok) {
-        throw new Error('Failed to update product');
-    }
-    return await response.json();
-};
-
-const ProductModal: React.FC<ModalProps> = ({ isOpen, onClose, mode, itemId }) => {
+const ProductModal: React.FC<ModalProps> = ({ isOpen, onClose, itemId, onEdit }) => {
     if (!isOpen) {
         return null;
     }
@@ -51,12 +37,7 @@ const ProductModal: React.FC<ModalProps> = ({ isOpen, onClose, mode, itemId }) =
                     const { message, data } = response;
                     if (data) {
                         setProduct(data);
-                        setEditFormData({
-                            name: data.name,
-                            price: Number(data.price),
-                            description: data.description,
-                            img_url: data.img_url
-                        });
+                        setEditFormData(data);
                     } else {
                         console.error('API Error:', message);
                         setFetchMessage('Something went wrong while loading the data');
@@ -72,10 +53,23 @@ const ProductModal: React.FC<ModalProps> = ({ isOpen, onClose, mode, itemId }) =
         }, []);
     }
 
-    const [editFormError, setEditFormError] = useState('');
-    
+    const [formInputChanged, setFormInputChanged] = useState(false);
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
+        if (!formInputChanged) {
+            setFormInputChanged(true);
+        }
+        setEditFormData((prevFormData) => ({
+            ...prevFormData,
+            [name]: value,
+        }));
+    };
+
+    const handleTextareaChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+        const { name, value } = e.target;
+        if (!formInputChanged) {
+            setFormInputChanged(true);
+        }
         setEditFormData((prevFormData) => ({
             ...prevFormData,
             [name]: value,
@@ -85,21 +79,8 @@ const ProductModal: React.FC<ModalProps> = ({ isOpen, onClose, mode, itemId }) =
     const editSubmitHandler = async (e: React.FormEvent<HTMLFormElement>) => {
         // Stop the page from reloading
         e.preventDefault();
-        try {
-            updateProduct(Number(itemId), editFormData)
-            .then(() => {
-                setEditFormError('Item successfully updated');
-                onClose();
-                // TODO: Emit message to update product display
-            })
-            .catch(error => {
-                setEditFormError(error.message);
-            });
-
-        } catch (exception) {
-            console.log(exception);
-            setEditFormError('An error occured. Cannot update at this time');
-        }
+        setFormInputChanged(false);
+        onEdit({id: Number(itemId), ...editFormData});
     };
 
     return (
@@ -107,6 +88,7 @@ const ProductModal: React.FC<ModalProps> = ({ isOpen, onClose, mode, itemId }) =
             <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
                 <div className="bg-white rounded-md">
                     {!product && fetchMessage.length !== 0 &&
+                        /** Display any error with the GET /api-items/:id */
                         <div className="p-10">
                             <h2 className="text-2xl font-bold mb-4">{fetchMessage}</h2>
                             <button
@@ -161,6 +143,7 @@ const ProductModal: React.FC<ModalProps> = ({ isOpen, onClose, mode, itemId }) =
                                         id="description"
                                         name="description"
                                         defaultValue={editFormData.description}
+                                        onChange={handleTextareaChange}
                                         className="mt-1 p-2 border rounded-md w-full"/>
                                 </div>
                                 <div className="relative mb-2">
