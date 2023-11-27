@@ -20,7 +20,11 @@ const updateProduct = async (productId: number, data: any) => {
         body: JSON.stringify(data)
     });
     if (!response.ok) {
-        throw new Error('Failed to update product');
+        let errorMessage = 'Unable to update the product';
+        if (response.status && response.status === 400) {
+            errorMessage = 'You have an invalid field value in the form.';
+        }
+        throw new Error(errorMessage);
     }
     return await response.json();
 };
@@ -66,7 +70,6 @@ const ProductGridItem: React.FC<ProductProps> = ({ product, onDelete, onUpdate }
                 })
                 .catch(error => {
                     setActionMessage(error.message);
-                    setActionMessage('An error occured. Cannot update at this time');
                 }).finally(() => {
                     setTimeout(() => {
                         setActionInProgress(false);

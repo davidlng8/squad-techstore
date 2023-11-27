@@ -4,7 +4,7 @@ import { ProductProps } from '../../interfaces/Product';
 
 const ProductGrid: React.FC = () => {
     const apiUrl = '/api-items';
-    const [products, setProducts] = useState<ProductGridItem[]>([]);
+    const [products, setProducts] = useState<ProductProps['product'][]>([]);
 
     const deleteProductHandler = (productId: number) => {
         // Remove the deleted product from the state
